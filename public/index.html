@@ -3,25 +3,28 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Palíndromos</title>
+    <title>Procesador de Archivos</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-    <h1>Procesador de Palíndromos</h1>
-    <form id="uploadForm">
-        <label>
-            <input type="radio" name="problema" value="1" checked> Problema 1
-        </label>
-        <label>
-            <input type="radio" name="problema" value="2"> Problema 2
-        </label>
+    <div class="container">
+        <h1>Procesador de Archivos</h1>
+        <form id="uploadForm">
+            <label>
+                <input type="radio" name="problema" value="1" checked> Problema 1 (Palíndromos)
+            </label>
+            <label>
+                <input type="radio" name="problema" value="2"> Problema 2 (Fiesta)
+            </label>
 
-        <input type="file" name="archivo" id="archivo" required>
-        <button type="submit">Procesar</button>
-    </form>
+            <input type="file" name="archivo" id="archivo" required>
+            <button type="submit">Procesar</button>
+        </form>
 
-    <h2>Resultado:</h2>
-    <pre id="resultado"></pre>
+        <h2>Resultado:</h2>
+        <pre id="resultado">Esperando archivo...</pre>
+    </div>
 
     <script>
         const form = document.getElementById('uploadForm');
@@ -41,7 +44,6 @@
                 if (res.ok && Array.isArray(data.resultado)) {
                     document.getElementById('resultado').innerText = data.resultado.join('\n');
                 } else if (data.resultado) {
-                    // Por si resultado es string (ej: del problema 2)
                     document.getElementById('resultado').innerText = data.resultado;
                 } else if (data.error) {
                     document.getElementById('resultado').innerText = "❌ Error: " + data.error;
@@ -49,11 +51,10 @@
                     document.getElementById('resultado').innerText = "❌ Error inesperado.";
                 }
             } catch (err) {
-                document.getElementById('resultado').innerText = "❌ Error de red o servidor: " + err.message;
+                document.getElementById('resultado').innerText = "❌ Error de red: " + err.message;
             }
         });
     </script>
-
 </body>
 
 </html>
