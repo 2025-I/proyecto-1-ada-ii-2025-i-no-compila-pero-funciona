@@ -3,6 +3,7 @@ import globals from 'globals';
 import js from '@eslint/js';
 import prettier from 'eslint-plugin-prettier';
 import eslintPluginImport from 'eslint-plugin-import';
+import eslintPluginJest from 'eslint-plugin-jest';
 
 export default defineConfig([
   js.configs.recommended,
@@ -13,6 +14,7 @@ export default defineConfig([
       globals: {
         ...globals.node,
         ...globals.es2021,
+        ...globals.jest,
       },
       ecmaVersion: 2022,
       sourceType: 'module',
@@ -20,6 +22,7 @@ export default defineConfig([
     plugins: {
       import: eslintPluginImport,
       prettier,
+      jest: eslintPluginJest,
     },
     rules: {
       // Import plugin rules

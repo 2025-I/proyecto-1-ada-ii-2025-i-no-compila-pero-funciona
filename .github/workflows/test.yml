@@ -1,0 +1,41 @@
+name: Ejecutar pruebas
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  test:
+    name: Pruebas con Node.js
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Clonar el repositorio
+        uses: actions/checkout@v3
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: 'npm'
+
+      - name: Instalar dependencias
+        run: npm ci # 👉 Usa 'npm ci' en lugar de 'npm install' para builds confiables
+
+      - name: Ejecutar pruebas y cobertura
+        run: npm run test:coverage # 👉 Ejecuta pruebas con reporte de cobertura
+        env:
+          NODE_OPTIONS: '--experimental-vm-modules' # 👉 Necesario para ES Modules
+
+      - name: Subir reporte de cobertura (opcional)
+        uses: actions/upload-artifact@v3
+        if: always() # 👉 Sube el reporte incluso si fallan los tests
+        with:
+          name: coverage-report
+          path: coverage/
