@@ -1,29 +1,40 @@
-name: SonarCloud Analysis
+name: CI Pipeline with Tests and SonarCloud
 on:
   push:
     branches: [main]
   pull_request:
-    types: [opened, synchronize, reopened]
+    branches: [main]
 
 jobs:
-  analyze:
-    name: Analyze
+  test-and-analyze:
+    name: Test and Analyze
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 0 # Necesario para SonarCloud
 
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
+          cache: 'npm'
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
+
+      - name: Run tests with coverage
+        run: npm run test:coverage
+        env:
+          NODE_OPTIONS: '--experimental-vm-modules'
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+            -Dsonar.testExecutionReportPaths=coverage/test-report.xml
