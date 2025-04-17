@@ -1,25 +1,25 @@
-name: SonarCloud
-
+name: SonarCloud Analysis
 on:
   push:
-    branches:
-      - main
-      - develop
+    branches: [develop, main]
   pull_request:
     types: [opened, synchronize, reopened]
-    branches:
-      - main
-      - develop
 
 jobs:
   sonarcloud:
-    name: SonarCloud
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # Necesario para que SonarCloud detecte correctamente los cambios
 
-      - name: Use Node.js
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: 17
+          distribution: 'temurin'
+
+      - name: Install Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
@@ -27,8 +27,8 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Run SonarCloud Scan
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
         env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: |
-          npx sonar-scanner
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Automáticamente proporcionado por GitHub
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} # Token que configuraste en los secrets
