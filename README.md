@@ -6,7 +6,7 @@
 
 Nombre completo | Código
 Juan Pablo Ospina Vanegas | 2411023
-Estudiante2 | 123457
+Carlos Fernando Padilla Mesa | 2059962
 Estudiante3 | 123458
 
 ## Descripción del taller
