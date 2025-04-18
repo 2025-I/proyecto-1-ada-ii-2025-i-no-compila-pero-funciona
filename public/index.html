@@ -11,18 +11,32 @@
     <div class="container">
         <h1>Procesador de Archivos</h1>
         <form id="uploadForm">
+            <h3>Problema 1 (Palíndromos)</h3>
             <label>
-                <input type="radio" name="problema" value="1" checked> Problema 1 (Palíndromos)
+                <input type="radio" name="problema" value="1" checked> Palíndromos - Solución Dinámica
             </label>
             <label>
-                <input type="radio" name="problema" value="2"> Problema 2 (Fiesta)
+                <input type="radio" name="problema" value="2"> Palíndromos - Solución Voraz
+            </label>
+            <label>
+                <input type="radio" name="problema" value="3"> Palíndromos - Solución de Fuerza Bruta
+            </label>
+            <h3>Problema 2 (Fiesta)</h3>
+            <label>
+                <input type="radio" name="problema" value="4" checked> Solucion Dinámica
+            </label>
+            <label>
+                <input type="radio" name="problema" value="5"> Solucion Voraz
+            </label>
+            <label>
+                <input type="radio" name="problema" value="6"> Solucion de Fuerza Bruta
             </label>
 
             <input type="file" name="archivo" id="archivo" required>
             <button type="submit">Procesar</button>
         </form>
 
-        <h2>Resultado:</h2>
+        <h3>Resultado:</h3>
         <pre id="resultado">Esperando archivo...</pre>
     </div>
 

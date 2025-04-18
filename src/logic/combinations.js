@@ -1,3 +1,4 @@
+// Solucion al problema - Dinamica
 export function getPermutations(inputString) {
   const data = inputString.split('\n').filter((line) => line.trim() !== '');
   let idx = 0;
@@ -102,5 +103,116 @@ export function getPermutations(inputString) {
     return { selected, sum };
   }
 
+  return output.join('\n');
+}
+
+// Solucion al problema - Voraz
+export function getPermutationsVoraz (inputString) {
+  const data = inputString.split('\n').filter((line) => line.trim() !== '');
+  let idx = 0;
+  const n = parseInt(data[idx++]);
+  const output = [];
+
+  for (let problem = 0; problem < n; problem++) {
+    const m = parseInt(data[idx++]);
+    const matrix = [];
+
+    // Leer matriz de supervisión
+    for (let i = 0; i < m; i++) {
+      matrix.push(data[idx++].split(' ').map(Number));
+    }
+
+    // Leer ratings
+    const ratings = data[idx++].split(' ').map(Number);
+
+    // Crear lista de empleados con sus índices y ratings
+    const employees = ratings.map((rating, idx) => ({ idx, rating }));
+        
+    // Ordenar por rating descendente
+    employees.sort((a, b) => b.rating - a.rating);
+
+    const invited = new Set();
+    const forbidden = new Set(); // Empleados que no pueden ser invitados
+    let sum = 0;
+
+    for (const emp of employees) {
+      if (!forbidden.has(emp.idx)) {
+        invited.add(emp.idx);
+        sum += emp.rating;
+                
+        // Marcar supervisores y subordinados como prohibidos
+        for (let i = 0; i < m; i++) {
+          if (matrix[emp.idx][i] === 1 || matrix[i][emp.idx] === 1) {
+            forbidden.add(i);
+          }
+        }
+      }
+    }
+
+    // Formatear salida
+    const result = Array(m).fill(0);
+    invited.forEach(emp => result[emp] = 1);
+    output.push(`${result.join(' ')} ${sum}`);
+  }
+  return output.join('\n');
+}
+
+// Solucion al problema - Fuerza Bruta
+export function getPermutationsFuerzaBruta(inputString) {
+  const data = inputString.split('\n').filter((line) => line.trim() !== '');
+  let idx = 0;
+  const n = parseInt(data[idx++]);
+  const output = [];
+
+  for (let problem = 0; problem < n; problem++) {
+    const m = parseInt(data[idx++]);
+    const matrix = [];
+
+    // Leer matriz de supervisión
+    for (let i = 0; i < m; i++) {
+      matrix.push(data[idx++].split(' ').map(Number));
+    }
+
+    // Leer ratings
+    const ratings = data[idx++].split(' ').map(Number);
+
+    // Generar todos los subconjuntos posibles
+    let maxSum = 0;
+    let bestSubset = [];
+    const totalSubsets = 1 << m; // 2^m
+
+    for (let mask = 0; mask < totalSubsets; mask++) {
+      const subset = [];
+      let isValid = true;
+      let sum = 0;
+
+      // Verificar restricciones y calcular suma
+      for (let i = 0; i < m; i++) {
+        if (mask & (1 << i)) {
+          subset.push(i);
+          sum += ratings[i];
+                
+          // Verificar si algún supervisor está también en el subset
+          for (let j = 0; j < m; j++) {
+            if (matrix[j][i] === 1 && (mask & (1 << j))) {
+              isValid = false;
+              break;
+            }
+          }
+          if (!isValid) break;
+        }
+      }
+
+      if (isValid && sum > maxSum) {
+        maxSum = sum;
+        bestSubset = subset;
+      }
+    }
+
+    // Formatear salida
+    const result = Array(m).fill(0);
+    bestSubset.forEach(emp => result[emp] = 1);
+    output.push(`${result.join(' ')} ${maxSum}`);
+  }
   return output.join('\n');
 }
