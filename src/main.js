@@ -3,7 +3,8 @@ import multer from 'multer';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { isPalindrome } from './logic/palindrome.js';
-import { getPermutations } from './logic/combinations.js';
+import { getPermutations, getPermutationsVoraz, getPermutationsFuerzaBruta } from './logic/combinations.js';
+import { get } from 'http';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -23,15 +24,35 @@ app.post('/upload', upload.single('archivo'), (req, res) => {
     const content = req.file.buffer.toString('utf-8');
     let resultado;
 
-    if (problema === '1') {
-      console.log('IsPalindrome: Contenido del archivo:', content);
-      resultado = isPalindrome(content);
-    } else if (problema === '2') {
-      console.log('Fiesta: Contenido del archivo:', content);
-      resultado = getPermutations(content);
-    } else {
+    switch (problema) {
+      case '1':
+        console.log('IsPalindrome Dinamica: Contenido del archivo:', content);
+        resultado = isPalindrome(content);
+        break;
+      case '2':
+        console.log('IsPalindrome Voraz: Contenido del archivo:', content);
+        resultado = isPalindrome(content);
+        break;
+      case '3':
+        console.log('IsPalindrome Fuerza Bruta: Contenido del archivo:', content);
+        resultado = isPalindrome(content);
+        break;
+      case '4':
+        console.log('IsPermutations Dinamico: Contenido del archivo:', content);
+        resultado = getPermutations(content);
+        break;
+      case '5':
+        console.log('IsPermutations Voraz: Contenido del archivo:', content);
+        resultado = getPermutationsVoraz(content);
+       break;
+      case '6':
+        console.log('IsPermutations Fuerza Bruta: Contenido del archivo:', content);
+        resultado = getPermutationsFuerzaBruta(content);
+        break;
+      default:
       return res.status(400).json({ error: 'Problema no válido' });
     }
+
 
     res.json({ resultado });
   } catch (err) {
