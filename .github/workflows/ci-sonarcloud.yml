@@ -39,4 +39,3 @@ jobs:
         with:
           args: >
             -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
-            -Dsonar.testExecutionReportPaths=coverage/test-report.xml
