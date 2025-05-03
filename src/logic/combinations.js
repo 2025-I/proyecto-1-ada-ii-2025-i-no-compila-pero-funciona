@@ -1,9 +1,8 @@
-// Solucion al problema - Dinamica
-export function getPermutations(inputString) {
+function parseInput(inputString) {
   const data = inputString.split('\n').filter((line) => line.trim() !== '');
   let idx = 0;
   const n = parseInt(data[idx++]);
-  const output = [];
+  const problems = [];
 
   for (let i = 0; i < n; i++) {
     const m = parseInt(data[idx++]);
@@ -16,10 +15,29 @@ export function getPermutations(inputString) {
 
     // Leer ratings
     const ratings = data[idx++].split(' ').map(Number);
+    
+    problems.push({ m, matrix, ratings });
+  }
+  
+  return problems;
+}
 
-    // Resolver y guardar resultado
+function formatOutput(m, bestSubset, maxSum) {
+  const result = Array(m).fill(0);
+  bestSubset.forEach(emp => result[emp] = 1);
+  return `${result.join(' ')} ${maxSum}`;
+}
+
+// Solucion al problema - Dinamica
+export function getPermutations(inputString) {
+  const problems = parseInput(inputString);
+  const output = [];
+
+  // Resolver y guardar resultado
+  for (const { m, matrix, ratings } of problems) {
     const { selected, sum } = solveProblem(m, matrix, ratings);
     output.push(`${selected.join(' ')} ${sum}`);
+
   }
 
   // Función para construir el árbol desde la matriz
@@ -108,23 +126,10 @@ export function getPermutations(inputString) {
 
 // Solucion al problema - Voraz
 export function getPermutationsVoraz (inputString) {
-  const data = inputString.split('\n').filter((line) => line.trim() !== '');
-  let idx = 0;
-  const n = parseInt(data[idx++]);
+  const problems = parseInput(inputString);
   const output = [];
 
-  for (let problem = 0; problem < n; problem++) {
-    const m = parseInt(data[idx++]);
-    const matrix = [];
-
-    // Leer matriz de supervisión
-    for (let i = 0; i < m; i++) {
-      matrix.push(data[idx++].split(' ').map(Number));
-    }
-
-    // Leer ratings
-    const ratings = data[idx++].split(' ').map(Number);
-
+  for (const { m, matrix, ratings } of problems) {
     // Crear lista de empleados con sus índices y ratings
     const employees = ratings.map((rating, idx) => ({ idx, rating }));
         
@@ -150,32 +155,17 @@ export function getPermutationsVoraz (inputString) {
     }
 
     // Formatear salida
-    const result = Array(m).fill(0);
-    invited.forEach(emp => result[emp] = 1);
-    output.push(`${result.join(' ')} ${sum}`);
+    output.push(formatOutput(m, Array.from(invited), sum));
   }
   return output.join('\n');
 }
 
 // Solucion al problema - Fuerza Bruta
 export function getPermutationsFuerzaBruta(inputString) {
-  const data = inputString.split('\n').filter((line) => line.trim() !== '');
-  let idx = 0;
-  const n = parseInt(data[idx++]);
+  const problems = parseInput(inputString);
   const output = [];
 
-  for (let problem = 0; problem < n; problem++) {
-    const m = parseInt(data[idx++]);
-    const matrix = [];
-
-    // Leer matriz de supervisión
-    for (let i = 0; i < m; i++) {
-      matrix.push(data[idx++].split(' ').map(Number));
-    }
-
-    // Leer ratings
-    const ratings = data[idx++].split(' ').map(Number);
-
+  for (const { m, matrix, ratings } of problems) {
     // Generar todos los subconjuntos posibles
     let maxSum = 0;
     let bestSubset = [];
@@ -210,9 +200,7 @@ export function getPermutationsFuerzaBruta(inputString) {
     }
 
     // Formatear salida
-    const result = Array(m).fill(0);
-    bestSubset.forEach(emp => result[emp] = 1);
-    output.push(`${result.join(' ')} ${maxSum}`);
+    output.push(formatOutput(m, bestSubset, maxSum));
   }
   return output.join('\n');
 }
