@@ -48,9 +48,25 @@ export function getPermutations(inputString) {
   function solveWithGraph(m, matrix, ratings) {
     // Identificar auto-supervisión
     const selfSupervision = new Set();
+    // Identificar empleados que no supervisan a nadie (fila de ceros)
+    const doesntSuperviseAnyone = new Set();
+    
     for (let i = 0; i < m; i++) {
       if (matrix[i][i] === 1) {
         selfSupervision.add(i);
+      }
+      
+      // Verificar si este empleado no supervisa a nadie
+      let supervisesSomeone = false;
+      for (let j = 0; j < m; j++) {
+        if (matrix[i][j] === 1) {
+          supervisesSomeone = true;
+          break;
+        }
+      }
+      
+      if (!supervisesSomeone) {
+        doesntSuperviseAnyone.add(i);
       }
     }
     
@@ -75,6 +91,12 @@ export function getPermutations(inputString) {
         for (let j = i+1; j < m; j++) {
           if (!(mask & (1 << j))) continue; // Saltar si el empleado j no está en el subconjunto
           
+          // CASO ESPECIAL: Si alguno de los empleados no supervisa a nadie, ignorar la regla de conflicto
+          if (doesntSuperviseAnyone.has(i) || doesntSuperviseAnyone.has(j)) {
+            continue;
+          }
+          
+          // Verificar conflicto entre supervisor-subordinado para empleados que sí supervisan
           if (matrix[i][j] === 1 || matrix[j][i] === 1) {
             dp[mask] = -Infinity; // Estado no válido
             return dp[mask];
