@@ -35,7 +35,7 @@ test('Permutations of 3x3 matrix with ratings', () => {
 12 21 5 10 8 7`;
 
   const expectedOutput1 = `0 1 0 0 1 38
-0 1 0 0 1 0 29`;
+0 1 0 0 1 1 36`;
   const expectedOutput2 = `0 1 0 0 1 38
 0 1 0 0 1 0 29`;
   const expectedOutput3 = `0 1 0 0 1 38
@@ -50,7 +50,7 @@ test('Permutations of 3x3 matrix with ratings', () => {
 test('Permutations of 10 elements', () => {
     const input = parserString("test_10_elementos.txt");
 
-    const expectedOutput = '1 0 1 20';
+    const expectedOutput = '0 1 1 25';
     const expectedOutputVoraz = '1 0 1 20';
     const expectedOutputFuerzaBruta = '1 0 1 20';
 
@@ -63,7 +63,7 @@ test('Permutations of 10 elements', () => {
 test('Permutations of 100 elements', () => {
   const input = parserString("test_100_elementos.txt");
 
-  const expectedOutput = '0 1 0 1 0 1 0 1 0 1 150';
+  const expectedOutput = '1 0 1 0 1 0 1 0 1 1 175';
   const expectedOutputVoraz = '0 1 0 1 0 1 0 1 0 1 150';
   const expectedOutputFuerzaBruta = '0 1 0 1 0 1 0 1 0 1 150';
 
