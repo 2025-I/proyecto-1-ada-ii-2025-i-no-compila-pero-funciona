@@ -34,12 +34,6 @@ export default defineConfig([
       'no-underscore-dangle': 'off',
       'node/no-unsupported-features/es-syntax': 'off',
 
-      // Style rules
-      semi: ['error', 'always'],
-      quotes: ['error', 'single', { avoidEscape: true }],
-      indent: ['error', 2],
-      'comma-dangle': ['error', 'only-multiline'],
-
       // Best practices
       'prefer-const': 'error',
       'arrow-body-style': ['error', 'as-needed'],
