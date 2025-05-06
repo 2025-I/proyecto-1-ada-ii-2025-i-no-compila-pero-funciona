@@ -1,7 +1,13 @@
 function parseInput(inputString) {
   const data = inputString.split('\n').filter((line) => line.trim() !== '');
   let idx = 0;
+  
+  // Agregar manejo de errores
+  if (data.length === 0) return [];
+  
   const n = parseInt(data[idx++]);
+  if (isNaN(n) || n <= 0) return [];
+
   const problems = [];
 
   for (let i = 0; i < n; i++) {
@@ -28,128 +34,153 @@ function formatOutput(m, bestSubset, maxSum) {
   return `${result.join(' ')} ${maxSum}`;
 }
 
-// Solucion al problema - Dinamica
+// Solución al problema - Dinámica
 export function getPermutations(inputString) {
   const problems = parseInput(inputString);
   const output = [];
 
   // Resolver y guardar resultado
   for (const { m, matrix, ratings } of problems) {
-    const { selected, sum } = solveProblem(m, matrix, ratings);
-    output.push(`${selected.join(' ')} ${sum}`);
-
+    const result = solveWithGraph(m, matrix, ratings);
+    output.push(formatOutput(m, result.bestSubset, result.maxSum));
   }
 
-  // Función para construir el árbol desde la matriz
-  function buildTree(m, matrix, ratings) {
-    const nodes = Array.from({ length: m }, (_, id) => ({
-      id,
-      parent: -1,
-      children: [],
-      rating: ratings[id],
-      include: 0,
-      exclude: 0,
-    }));
-
-    // Encontrar padres y construir hijos
-    for (let j = 0; j < m; j++) {
-      for (let i = 0; i < m; i++) {
+  function solveWithGraph(m, matrix, ratings) {
+    // Identificar auto-supervisión
+    const selfSupervision = new Set();
+    // Identificar empleados que no supervisan a nadie (fila de ceros)
+    const doesntSuperviseAnyone = new Set();
+    
+    for (let i = 0; i < m; i++) {
+      if (matrix[i][i] === 1) {
+        selfSupervision.add(i);
+      }
+      
+      // Verificar si este empleado no supervisa a nadie
+      let supervisesSomeone = false;
+      for (let j = 0; j < m; j++) {
         if (matrix[i][j] === 1) {
-          nodes[j].parent = i;
-          nodes[i].children.push(j);
-          break; // Asume un solo padre
+          supervisesSomeone = true;
+          break;
         }
       }
-
-      // Encontrar la raíz (nodo sin padre)
-      const root = nodes.find((node) => node.parent === -1);
-      return { nodes, root };
+      
+      if (!supervisesSomeone) {
+        doesntSuperviseAnyone.add(i);
+      }
     }
-  }
-
-  // Recorrido postorden para calcular include y exclude
-  function calculateDP(nodes, nodeId) {
-    const node = nodes[nodeId];
-    node.include = node.rating;
-    node.exclude = 0;
-
-    for (const childId of node.children) {
-      calculateDP(nodes, childId);
-      const child = nodes[childId];
-      node.include += child.exclude;
-      node.exclude += Math.max(child.include, child.exclude);
-    }
-  }
-
-  // Seleccionar nodos óptimos
-  function selectNodes(nodes, nodeId, parentIncluded, selected) {
-    const node = nodes[nodeId];
-    if (parentIncluded) {
-      selected[node.id] = 0;
-      node.children.forEach((childId) => selectNodes(nodes, childId, true, selected));
-    } else {
-      if (node.include > node.exclude) {
-        selected[node.id] = 1;
-        node.children.forEach((childId) => selectNodes(nodes, childId, true, selected));
-      } else {
-        if (node.include > node.exclude) {
-          selected[node.id] = 1;
-          node.children.forEach((childId) => selectNodes(nodes, childId, true, selected));
-        } else {
-          if (node.include > node.exclude) {
-            selected[node.id] = 1;
-            node.children.forEach((childId) => selectNodes(nodes, childId, true, selected));
-          } else {
-            selected[node.id] = 0;
-            node.children.forEach((childId) => selectNodes(nodes, childId, false, selected));
+    
+    // Usar enfoque de programación dinámica con máscara de bits
+    const totalStates = 1 << m;
+    const dp = new Array(totalStates).fill(-1); // -1 significa que aún no se ha calculado
+    
+    // Obtener la calificación máxima para un subconjunto específico de empleados
+    function getMaskValue(mask) {
+      if (dp[mask] !== -1) return dp[mask];
+      
+      // Verificar si esta máscara es válida (sin empleados en conflicto)
+      for (let i = 0; i < m; i++) {
+        if (!(mask & (1 << i))) continue; // Saltar si el empleado i no está en el subconjunto
+        
+        // Verificar auto-supervisión
+        if (selfSupervision.has(i)) {
+          dp[mask] = -Infinity; // Estado no válido
+          return dp[mask];
+        }
+        
+        for (let j = i+1; j < m; j++) {
+          if (!(mask & (1 << j))) continue; // Saltar si el empleado j no está en el subconjunto
+          
+          // CASO ESPECIAL: Si alguno de los empleados no supervisa a nadie, ignorar la regla de conflicto
+          if (doesntSuperviseAnyone.has(i) || doesntSuperviseAnyone.has(j)) {
+            continue;
+          }
+          
+          // Verificar conflicto entre supervisor-subordinado para empleados que sí supervisan
+          if (matrix[i][j] === 1 || matrix[j][i] === 1) {
+            dp[mask] = -Infinity; // Estado no válido
+            return dp[mask];
           }
         }
       }
+      
+      // Calcular la suma de calificaciones para esta máscara válida
+      let sum = 0;
+      for (let i = 0; i < m; i++) {
+        if (mask & (1 << i)) {
+          sum += ratings[i];
+        }
+      }
+      
+      dp[mask] = sum;
+      return sum;
     }
-  }
-
-  // Resolver un problema
-  function solveProblem(m, matrix, ratings) {
-    const { nodes, root } = buildTree(m, matrix, ratings);
-    if (!root) return { selected: Array(m).fill(0), sum: 0 };
-
-    calculateDP(nodes, root.id);
-    const selected = Array(m).fill(0);
-    selectNodes(nodes, root.id, false, selected);
-
-    const sum = nodes.reduce((acc, node, idx) => acc + (selected[idx] ? node.rating : 0), 0);
-    return { selected, sum };
+    
+    // Calcular el valor para todas las máscaras posibles
+    for (let mask = 0; mask < totalStates; mask++) {
+      getMaskValue(mask);
+    }
+    
+    // Encontrar la máscara con el valor máximo
+    let maxValue = 0;
+    let optimalMask = 0;
+    
+    for (let mask = 0; mask < totalStates; mask++) {
+      if (dp[mask] > maxValue) {
+        maxValue = dp[mask];
+        optimalMask = mask;
+      }
+    }
+    
+    // Convertir máscara a subconjunto
+    const bestSubset = [];
+    for (let i = 0; i < m; i++) {
+      if (optimalMask & (1 << i)) {
+        bestSubset.push(i);
+      }
+    }
+    
+    return { bestSubset, maxSum: maxValue };
   }
 
   return output.join('\n');
 }
 
-// Solucion al problema - Voraz
-export function getPermutationsVoraz (inputString) {
+// Solución al problema - Voraz
+export function getPermutationsVoraz(inputString) {
   const problems = parseInput(inputString);
   const output = [];
 
   for (const { m, matrix, ratings } of problems) {
     // Crear lista de empleados con sus índices y ratings
     const employees = ratings.map((rating, idx) => ({ idx, rating }));
-        
+    
+    // Verificar primero auto-supervisión y excluir esos empleados
+    const selfSupervising = new Set();
+    for (let i = 0; i < m; i++) {
+      if (matrix[i][i] === 1) {
+        selfSupervising.add(i);
+      }
+    }
+    
     // Ordenar por rating descendente
     employees.sort((a, b) => b.rating - a.rating);
 
     const invited = new Set();
-    const forbidden = new Set(); // Empleados que no pueden ser invitados
+    const forbidden = new Set(selfSupervising); // Comenzar con los auto-supervisores como prohibidos
     let sum = 0;
 
     for (const emp of employees) {
-      if (!forbidden.has(emp.idx)) {
-        invited.add(emp.idx);
-        sum += emp.rating;
-                
-        // Marcar supervisores y subordinados como prohibidos
-        for (let i = 0; i < m; i++) {
-          if (matrix[emp.idx][i] === 1 || matrix[i][emp.idx] === 1) {
-            forbidden.add(i);
-          }
+      // Saltar si ya está prohibido
+      if (forbidden.has(emp.idx)) continue;
+      
+      invited.add(emp.idx);
+      sum += emp.rating;
+      
+      // Marcar empleados relacionados como prohibidos
+      for (let i = 0; i < m; i++) {
+        if (matrix[emp.idx][i] === 1 || matrix[i][emp.idx] === 1) {
+          forbidden.add(i);
         }
       }
     }
@@ -160,12 +191,20 @@ export function getPermutationsVoraz (inputString) {
   return output.join('\n');
 }
 
-// Solucion al problema - Fuerza Bruta
+// Solución al problema - Fuerza Bruta
 export function getPermutationsFuerzaBruta(inputString) {
   const problems = parseInput(inputString);
   const output = [];
 
   for (const { m, matrix, ratings } of problems) {
+    // Verificar primero auto-supervisión
+    const selfSupervising = new Set();
+    for (let i = 0; i < m; i++) {
+      if (matrix[i][i] === 1) {
+        selfSupervising.add(i);
+      }
+    }
+    
     // Generar todos los subconjuntos posibles
     let maxSum = 0;
     let bestSubset = [];
@@ -179,18 +218,27 @@ export function getPermutationsFuerzaBruta(inputString) {
       // Verificar restricciones y calcular suma
       for (let i = 0; i < m; i++) {
         if (mask & (1 << i)) {
+          // Saltar empleados con auto-supervisión
+          if (selfSupervising.has(i)) {
+            isValid = false;
+            break;
+          }
           subset.push(i);
           sum += ratings[i];
-                
-          // Verificar si algún supervisor está también en el subset
-          for (let j = 0; j < m; j++) {
-            if (matrix[j][i] === 1 && (mask & (1 << j))) {
-              isValid = false;
-              break;
-            }
-          }
-          if (!isValid) break;
         }
+      }
+      
+      if (!isValid) continue;
+      
+      // Segunda pasada: validar que no haya pares supervisor-subordinado
+      for (const i of subset) {
+        for (const j of subset) {
+          if (i !== j && (matrix[i][j] === 1 || matrix[j][i] === 1)) {
+            isValid = false;
+            break;
+          }
+        }
+        if (!isValid) break;
       }
 
       if (isValid && sum > maxSum) {
