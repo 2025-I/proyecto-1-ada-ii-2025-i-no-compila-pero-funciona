@@ -24,8 +24,18 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Run tests with coverage (continue on failure)
+        run: |
+          echo "Running tests..."
+          npm run test:coverage || echo "Tests failed, continuing with SonarCloud scan"
+        env:
+          NODE_OPTIONS: '--experimental-vm-modules'
+
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
