@@ -141,7 +141,7 @@ describe('Pruebas de algoritmos de palíndromos', () => {
     }
   });
 
-  // 3. Prueba Mediana (1000 elementos) - Versión optimizada
+  // 3. Prueba Mediana (1000 elementos)
   describe('Prueba Mediana (1000 elementos)', () => {
     // Cambiamos el patrón para garantizar palíndromos contiguos detectables
     const patron = 'abcba'; // Este patrón contiene el palíndromo "abcba"

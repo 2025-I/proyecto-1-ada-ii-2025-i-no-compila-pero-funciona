@@ -11,8 +11,7 @@ export function normalizarCadena(str) {
     .replace(/[^a-z0-9]/g, '');
 }
 
-// DINAMIC
-// === PROGRAMACIÓN DINÁMICA CORREGIDA ===
+// DINAMICA
 export function dinamicPalindromeSubsequence(fileContent) {
   const lines = fileContent
     .split('\n')
