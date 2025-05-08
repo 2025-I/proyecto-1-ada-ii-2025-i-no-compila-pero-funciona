@@ -90,3 +90,102 @@ Los gráficos muestran el tiempo de ejecución (en ms) para diferentes tamaños 
    - Los resultados podrían variar en diferentes arquitecturas de hardware
 
 Esta evaluación muestra que, contrario a la intuición teórica, no siempre los algoritmos con mejor complejidad asintótica son los más eficientes en la práctica para todos los rangos de entrada.
+
+## 4. Implementación del Código
+
+A continuación, se describen los tres enfoques algorítmicos diferentes para resolver el problema de selección óptima de empleados, junto con cada componente del código:
+
+### Funciones Principales
+
+#### `parseInput(inputString)`
+- **Función**: Procesa la entrada en formato de texto.
+- **Proceso**: 
+  - Divide la entrada por líneas
+  - Extrae el número de casos de prueba
+  - Para cada caso, lee la dimensión de la matriz, la matriz de supervisión y las calificaciones
+  - Retorna una estructura de datos organizada para cada problema
+
+#### `formatOutput(m, bestSubset, maxSum)`
+- **Función**: Convierte la solución a un formato de salida estandarizado.
+- **Proceso**:
+  - Crea un array de ceros de longitud m
+  - Marca con 1 las posiciones correspondientes a los empleados seleccionados
+  - Concatena la suma máxima al final
+  - Retorna una cadena formateada
+
+### Algoritmo de Programación Dinámica (`getPermutations`)
+
+- **Enfoque**: Utiliza programación dinámica con máscaras de bits para representar subconjuntos.
+- **Aspectos clave**:
+  - Identifica previamente empleados con auto-supervisión
+  - Identifica empleados que no supervisan a nadie (para optimización)
+  - Utiliza un array `dp` donde cada índice representa una máscara de bits
+  - Implementa la función recursiva `getMaskValue` para calcular la calificación máxima de cada estado
+  - Verifica restricciones de supervisión para cada máscara
+  - Selecciona la máscara con el valor máximo
+
+### Algoritmo Voraz (`getPermutationsVoraz`)
+
+- **Enfoque**: Selecciona empleados en orden descendente de calificación, excluyendo aquellos que generan conflictos.
+- **Aspectos clave**:
+  - Ordena los empleados por calificación de mayor a menor
+  - Excluye previamente empleados con auto-supervisión
+  - Mantiene conjuntos de empleados invitados y prohibidos
+  - Al seleccionar un empleado, marca como prohibidos a todos aquellos que tienen relación de supervisión con él
+
+### Algoritmo de Fuerza Bruta (`getPermutationsFuerzaBruta`)
+
+- **Enfoque**: Evalúa todos los posibles subconjuntos de empleados.
+- **Aspectos clave**:
+  - Genera $2^m$ subconjuntos utilizando máscaras de bits
+  - Para cada subconjunto:
+    1. Verifica restricciones de auto-supervisión
+    2. Calcula la suma de calificaciones
+    3. Verifica que no haya relaciones supervisor-subordinado entre los seleccionados
+  - Mantiene registro del mejor subconjunto encontrado
+
+### Optimizaciones Implementadas
+
+1. **Pre-procesamiento de auto-supervisión**: Los tres algoritmos identifican y excluyen inicialmente empleados que se auto-supervisan.
+   
+2. **Manejo especial para empleados sin subordinados** (Programación Dinámica): Se identifican empleados que no supervisan a nadie para reducir el espacio de búsqueda.
+   
+3. **Detección temprana de estados inválidos**: Los algoritmos terminan la evaluación de un estado tan pronto como detectan una violación de restricciones.
+
+## 5. Ejemplos de Ejecución
+
+A continuación, se presentan ejemplos no triviales del funcionamiento de los algoritmos con distintos tamaños de entrada:
+
+### Caso de Prueba Pequeño (3 empleados)
+
+![Ejemplo de ejecución con 3 empleados](./imagenes/p2_ejemplo_3_empleados.png)
+
+**Observaciones**:
+- Los tres algoritmos producen resultados en menos de 0.1ms
+- La solución óptima encontrada es `0 1 1` con suma total 25
+- El algoritmo voraz y fuerza bruta coinciden en la solución
+
+### Caso con 10 empleados
+
+![Ejemplo con 10 empleados](./imagenes/p2_ejemplo_10_empleados.png)
+
+**Observaciones**:
+- Nuevamente se observa mejor eficiencia en el restulado dinamico.
+- En estos el tiempo no varia, todos estan por debajo de 0,18ms
+- La solución final difiere un poco entre programación dinámica y los otros enfoques, siendo predominante la solucion dinamica.
+
+### Caso con tamaño de 25 empleados
+
+![Ejemplo con 25 empleados](./imagenes/p2_ejemplo_25_empleados.png)
+
+**Observaciones**:
+- Los tiempos de ejecución aumentan significativamente
+- El algoritmo voraz muestra un tiempo de 0.45ms
+- Programación dinámica ejecuta en 0.29ms 
+- La diferencia entre las soluciones se vuelve más pronunciada, siendo la solucion dinamica la más efectiva
+
+---
+
+# [Informe de Complejidad Algorítmica](./complejidad/complejidad_p2.md)
+ 
+Detalles sobre el análisis de la complejidad cpmputacional teórica y práctica de los algoritmos implementados, incluyendo observaciones clave.
