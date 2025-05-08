@@ -11,7 +11,8 @@ export function normalizarCadena(str) {
     .replace(/[^a-z0-9]/g, '');
 }
 
-// DINAMICA
+// DINAMIC
+// === PROGRAMACIÓN DINÁMICA CORREGIDA ===
 export function dinamicPalindromeSubsequence(fileContent) {
   const lines = fileContent
     .split('\n')
@@ -22,40 +23,56 @@ export function dinamicPalindromeSubsequence(fileContent) {
 
   const resultados = lines.map((line) => {
     const str = normalizarCadena(line);
-    return palindromoDinamicoPorCadena(str);
+    return encontrarSubsecuenciaPalindromica(str);
   });
 
   return resultados.join('\n');
 }
 
-function palindromoDinamicoPorCadena(str) {
+function encontrarSubsecuenciaPalindromica(str) {
   const n = str.length;
   if (n === 0) return '';
 
-  // Matriz para almacenar los resultados de subproblemas
-  const dp = Array.from({ length: n }, () => Array(n).fill(''));
+  // Enfoque alternativo: encontrar el palíndromo más largo que sea subcadena
+  let maxLength = 1;
+  let start = 0;
 
-  // Cada carácter individual es un palíndromo de longitud 1
+  // Matriz para indicar si str[i..j] es palíndromo
+  const dp = Array.from({ length: n }, () => Array(n).fill(false));
+
+  // Todas las subcadenas de longitud 1 son palíndromos
   for (let i = 0; i < n; i++) {
-    dp[i][i] = str[i];
+    dp[i][i] = true;
   }
 
-  // Llenamos la matriz para subcadenas de longitud 2 a n
-  for (let len = 2; len <= n; len++) {
-    for (let i = 0; i <= n - len; i++) {
-      const j = i + len - 1;
-      if (str[i] === str[j]) {
-        dp[i][j] = str[i] + dp[i + 1][j - 1] + str[j];
-      } else {
-        dp[i][j] = dp[i + 1][j].length > dp[i][j - 1].length
-          ? dp[i + 1][j]
-          : dp[i][j - 1];
+  // Verificar subcadenas de longitud 2
+  for (let i = 0; i < n - 1; i++) {
+    if (str[i] === str[i + 1]) {
+      dp[i][i + 1] = true;
+      if (maxLength < 2) {
+        start = i;
+        maxLength = 2;
       }
     }
   }
 
-  return dp[0][n - 1];
+  // Verificar subcadenas de longitud > 2
+  for (let len = 3; len <= n; len++) {
+    for (let i = 0; i < n - len + 1; i++) {
+      const j = i + len - 1;
+      if (str[i] === str[j] && dp[i + 1][j - 1]) {
+        dp[i][j] = true;
+        if (len > maxLength) {
+          start = i;
+          maxLength = len;
+        }
+      }
+    }
+  }
+
+  return str.substring(start, start + maxLength);
 }
+
 // VORAZ
 export function vorazPalindromeSubsequence(inputString) {
   const lines = inputString
@@ -108,7 +125,8 @@ function expandirDesdeCentro(str, left, right, resultados) {
     right++;
   }
 }
-//  FUERZA BRUTA
+
+// FUERZA BRUTA
 export function bruteForcePalindromicSubsequence(inputString) {
   const lines = inputString
     .split('\n')
@@ -122,87 +140,96 @@ export function bruteForcePalindromicSubsequence(inputString) {
     const n = str.length;
     if (n === 0) return '';
 
-    // Límite para fuerza bruta
-    if (n > 25) {
-      return encontrarPalindromoOptimo(str); // Función para cadenas largas
+    // Para cadenas largas, usar el enfoque dinámico directamente
+    if (n > 20) {
+      return encontrarPalindromoOptimo(str);
     }
 
     let maxLen = 0;
-    const resultSet = new Set();
+    let bestPalindromes = new Set();
 
-    function isPalindrome(s) {
-      if (s.length <= 1) return true;
-      let left = 0;
-      let right = s.length - 1;
-      while (left < right) {
-        if (s[left] !== s[right]) return false;
-        left++;
-        right--;
+    // Función para verificar palíndromos
+    const isPalindrome = s => {
+      const len = s.length;
+      for (let i = 0; i < len / 2; i++) {
+        if (s[i] !== s[len - 1 - i]) return false;
       }
       return true;
-    }
+    };
 
-    // Generamos subsecuencias de mayor a menor longitud
-    for (let len = n; len >= 1; len--) {
-      if (len < maxLen) break; // No buscar más cortas que el máximo encontrado
-
-      const indices = Array(len).fill(0).map((_, i) => i);
-
-      while (true) {
-        const subsequence = indices.map(i => str[i]).join('');
-        if (isPalindrome(subsequence)) {
-          if (subsequence.length > maxLen) {
-            maxLen = subsequence.length;
-            resultSet.clear();
-            resultSet.add(subsequence);
-          } else if (subsequence.length === maxLen) {
-            resultSet.add(subsequence);
-          }
-        }
-
-        // Generar siguiente combinación
-        let i = len - 1;
-        while (i >= 0 && indices[i] === i + n - len) {
-          i--;
-        }
-        if (i < 0) break;
-        indices[i]++;
-        for (let j = i + 1; j < len; j++) {
-          indices[j] = indices[j - 1] + 1;
+    // Generar todas las posibles subsecuencias
+    for (let mask = 1; mask < (1 << n); mask++) {
+      let subsequence = '';
+      for (let i = 0; i < n; i++) {
+        if (mask & (1 << i)) {
+          subsequence += str[i];
         }
       }
 
-      if (maxLen === n) break; // Si encontramos el máximo posible
+      if (isPalindrome(subsequence)) {
+        if (subsequence.length > maxLen) {
+          maxLen = subsequence.length;
+          bestPalindromes = new Set([subsequence]);
+        } else if (subsequence.length === maxLen) {
+          bestPalindromes.add(subsequence);
+        }
+      }
     }
 
-    return [...resultSet].sort().join(', ');
+    // Seleccionar el palíndromo más "natural" (el que aparece primero en la cadena original)
+    if (bestPalindromes.size > 0) {
+      const palindromesArray = Array.from(bestPalindromes);
+      // Ordenar por posición de inicio más temprana
+      palindromesArray.sort((a, b) => {
+        return str.indexOf(a) - str.indexOf(b);
+      });
+      return palindromesArray[0];
+    }
+
+    return '';
   });
 
   return results.join('\n');
 }
 
-// Función auxiliar para cadenas largas (usa enfoque dinámico como fallback)
+// Función auxiliar optimizada para cadenas largas
 function encontrarPalindromoOptimo(str) {
-  // Implementación simplificada - en realidad deberías usar tu función dinámica
   const n = str.length;
-  const dp = Array.from({ length: n }, () => Array(n).fill(''));
+  if (n === 0) return '';
 
+  let maxLength = 1;
+  let start = 0;
+
+  // Matriz para almacenar si subcadena [i..j] es palíndromo
+  const dp = Array.from({ length: n }, () => Array(n).fill(false));
+
+  // Todas las subcadenas de longitud 1 son palíndromos
   for (let i = 0; i < n; i++) {
-    dp[i][i] = str[i];
+    dp[i][i] = true;
   }
 
-  for (let len = 2; len <= n; len++) {
-    for (let i = 0; i <= n - len; i++) {
+  // Verificar subcadenas de longitud 2
+  for (let i = 0; i < n - 1; i++) {
+    if (str[i] === str[i + 1]) {
+      dp[i][i + 1] = true;
+      start = i;
+      maxLength = 2;
+    }
+  }
+
+  // Verificar subcadenas de longitud > 2
+  for (let len = 3; len <= n; len++) {
+    for (let i = 0; i < n - len + 1; i++) {
       const j = i + len - 1;
-      if (str[i] === str[j]) {
-        dp[i][j] = str[i] + dp[i + 1][j - 1] + str[j];
-      } else {
-        dp[i][j] = dp[i + 1][j].length > dp[i][j - 1].length
-          ? dp[i + 1][j]
-          : dp[i][j - 1];
+      if (str[i] === str[j] && dp[i + 1][j - 1]) {
+        dp[i][j] = true;
+        if (len > maxLength) {
+          start = i;
+          maxLength = len;
+        }
       }
     }
   }
 
-  return dp[0][n - 1];
+  return str.substring(start, start + maxLength);
 }
