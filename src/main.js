@@ -2,12 +2,17 @@ import express from 'express';
 import multer from 'multer';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { isPalindrome } from './logic/palindrome.js';
 import {
   getPermutations,
   getPermutationsVoraz,
   getPermutationsFuerzaBruta,
 } from './logic/combinations.js';
+import {
+  bruteForcePalindromicSubsequence,
+  dinamicPalindromeSubsequence,
+  vorazPalindromeSubsequence,
+} from './logic/palindrome.js';
+import { get } from 'http';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -34,9 +39,16 @@ app.post('/upload', upload.array('archivos'), (req, res) => {
 
       switch (problema) {
         case '1':
+          console.log('IsPalindrome Dinamica: Contenido del archivo:', content);
+          resultado = dinamicPalindromeSubsequence(content);
+          break;
         case '2':
+          console.log('IsPalindrome Voraz: Contenido del archivo:', content);
+          resultado = vorazPalindromeSubsequence(content);
+          break;
         case '3':
-          resultado = isPalindrome(content);
+          console.log('IsPalindrome Fuerza Bruta: Contenido del archivo:', content);
+          resultado = bruteForcePalindromicSubsequence(content);
           break;
         case '4':
           resultado = getPermutations(content);
