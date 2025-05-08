@@ -2,7 +2,7 @@
 
 # Proyecto 1: Análisis de Algoritmos II
 
-**Fecha de entrega:** 07 de mayo de 2025
+**Fecha de entrega:** 08 de mayo de 2025
 
 **Lenguaje implementado:** JavaScript (Node.js + Interfaz Web)
 
@@ -106,3 +106,7 @@ npm start
 ```bash
 Servidor corriendo en http://localhost:3000
 ```
+
+## 📂 Informe
+
+- 🔍 [Informe detallado de los problemas](./docs/informe.md)
