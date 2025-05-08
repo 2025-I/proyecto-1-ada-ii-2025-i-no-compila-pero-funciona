@@ -62,12 +62,52 @@ Los desarrollos individuales están separados por archivo, para facilitar su man
 
 ---
 
+> ⚠️ **Importante:** El informe se encuentra estructurado en archivos independientes dentro de la carpeta `docs/`, siguiendo las recomendaciones del enunciado del proyecto.
+
+---
+
+## ✅ Calidad del Código con SonarCloud
+
+Como parte del proceso de aseguramiento de calidad, se integró **SonarCloud** al flujo de trabajo mediante GitHub Actions, con el objetivo de evaluar automáticamente:
+
+- Cobertura de pruebas unitarias
+- Código duplicado
+- Problemas potenciales (bugs y code smells)
+
+### 📊 Resultados Obtenidos
+
+| Métrica                   | Resultado | Umbral Requerido | Estado         |
+| ------------------------- | --------- | ---------------- | -------------- |
+| **Cobertura de código**   | 90.4%     | ≥ 80%            | ✅ Aprobado    |
+| **Duplicación de código** | 10.5%     | ≤ 3%             | ❌ Fallido     |
+| **Issues nuevos**         | 11        | -                | ⚠️ En revisión |
+| **Security Hotspots**     | 0         | -                | ✅ N/A         |
+
+### 📌 Observaciones
+
+- La **cobertura** supera ampliamente el mínimo recomendado (90.4%), lo cual indica que las pruebas unitarias cubren la mayoría del código nuevo.
+- El informe **falló el Quality Gate** debido a una **alta duplicación de código (10.5%)**, superando el límite permitido por la configuración actual (3%).
+- La duplicación se debe principalmente a estructuras similares entre funciones de los tres enfoques implementados (fuerza bruta, voraz y programación dinámica).
+- Se identificaron 11 issues menores, ninguno considerado como blocker o bug crítico.
+
+### 📈 Acciones futuras
+
+- Refactorizar partes del código que repiten lógica para reducir duplicación.
+- Aplicar patrones de diseño que permitan compartir funcionalidades comunes entre algoritmos.
+- Continuar monitoreando el análisis con SonarCloud tras cada push.
+
+> A pesar de no pasar el Quality Gate en su totalidad, el uso de SonarCloud ha sido valioso para detectar oportunidades de mejora estructural en el código.
+
+### 📦 Pipeline de Integración Continua
+
+- Se ejecutan pruebas y análisis de SonarCloud automáticamente en cada push y pull request a la rama `main`.
+- El análisis se encuentra documentado en el archivo `.github/workflows/ci-sonarcloud.yml`.
+  ![alt text](imagenes/sonarCloud.png)
+
+---
+
 ### ✍️ Autores del Proyecto
 
 - **Nombre del estudiante 1** Juan Pablo Ospina Vanegas
 - **Nombre del estudiante 2** Carlos Fernando Padilla Mesa
 - **Nombre del estudiante 3** Diana Marcela Oviedo
-
----
-
-> ⚠️ **Importante:** El informe se encuentra estructurado en archivos independientes dentro de la carpeta `docs/`, siguiendo las recomendaciones del enunciado del proyecto.
